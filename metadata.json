@@ -1,0 +1,7 @@
+{
+  "name": "ExpoVite — Lead Manager",
+  "description": "Premium enterprise-grade lead management for expos with card scanning and offline support.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
