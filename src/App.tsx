@@ -41,18 +41,13 @@ import { Expo, Lead, Priority, DISTRICTS, DISTRICT_STATE_MAP, INTEREST_CATEGORIE
 
 // --- Components ---
 
-const BottomNav = ({ activeTab, onTabChange, expoContext = false }: { activeTab: string, onTabChange: (tab: string) => void, expoContext?: boolean }) => {
-  const tabs = expoContext 
-    ? [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'new-lead', label: 'New Lead', icon: UserPlus },
-        { id: 'all-leads', label: 'All Leads', icon: Users },
-        { id: 'settings', label: 'Settings', icon: SettingsIcon },
-      ]
-    : [
-        { id: 'home', label: 'Expos', icon: LayoutDashboard },
-        { id: 'settings', label: 'Settings', icon: SettingsIcon },
-      ];
+const BottomNav = ({ activeTab, onTabChange }: { activeTab: string, onTabChange: (tab: string) => void }) => {
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'new-lead', label: 'New Lead', icon: UserPlus },
+    { id: 'all-leads', label: 'All Leads', icon: Users },
+    { id: 'settings', label: 'Settings', icon: SettingsIcon },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-20 glass border-t border-white/5 flex items-center justify-around px-4 pb-4 z-50">
@@ -100,103 +95,7 @@ const PriorityBadge = ({ priority }: { priority: Priority }) => {
 
 // --- Screens ---
 
-const ExpoSelection: React.FC<{ onSelectExpo: (expo: Expo) => void, onOpenSettings: () => void, onAddExpo: () => void, data: any }> = ({ onSelectExpo, onOpenSettings, onAddExpo, data }) => {
-  const activeExpos = data.expos.filter((e: Expo) => e.status === 'active');
-  const upcomingExpos = data.expos.filter((e: Expo) => e.status === 'upcoming');
-  const pastExpos = data.expos.filter((e: Expo) => e.status === 'ended');
 
-  return (
-    <ScreenWrapper>
-      <header className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">ExpoVite</h1>
-        <Avatar className="w-10 h-10 cursor-pointer border border-white/10" onClick={onOpenSettings}>
-          <AvatarFallback>{data.agent.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
-        </Avatar>
-      </header>
-
-      {activeExpos.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xs font-bold text-[#5a5675] uppercase tracking-widest mb-4">Live Now</h2>
-          {activeExpos.map((expo: Expo) => (
-            <Card key={expo.id} className="glow-purple border-[#7c6cf0]/30 overflow-hidden cursor-pointer" onClick={() => onSelectExpo(expo)}>
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2 h-2 rounded-full bg-[#34d399] animate-pulse-green" />
-                  <span className="text-[10px] font-bold text-[#34d399] uppercase tracking-widest">Live</span>
-                </div>
-                <h3 className="text-xl font-bold mb-1">{expo.name}</h3>
-                <div className="flex items-center gap-4 text-sm text-[#9994b8]">
-                  <div className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    {expo.location}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar size={14} />
-                    {new Date(expo.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xs text-[#5a5675]">Today's Leads</span>
-                  <span className="text-lg font-mono font-bold text-[#7c6cf0]">{expo.leads.length}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      <div className="space-y-8">
-        {upcomingExpos.length > 0 && (
-          <div>
-            <h2 className="text-xs font-bold text-[#5a5675] uppercase tracking-widest mb-4">Upcoming</h2>
-            <div className="space-y-3">
-              {upcomingExpos.map((expo: Expo) => (
-                <Card key={expo.id} className="cursor-pointer hover:border-white/20 transition-colors" onClick={() => onSelectExpo(expo)}>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-bold">{expo.name}</h4>
-                      <p className="text-xs text-[#9994b8]">{expo.location} · {new Date(expo.startDate).toLocaleDateString()}</p>
-                    </div>
-                    <span className="px-2 py-1 rounded-full bg-white/5 text-[10px] font-bold text-[#9994b8] uppercase tracking-wider">Upcoming</span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {pastExpos.length > 0 && (
-          <div>
-            <h2 className="text-xs font-bold text-[#5a5675] uppercase tracking-widest mb-4">Past</h2>
-            <div className="space-y-3">
-              {pastExpos.map((expo: Expo) => (
-                <Card key={expo.id} className="cursor-pointer opacity-70 hover:opacity-100 transition-all" onClick={() => onSelectExpo(expo)}>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-bold">{expo.name}</h4>
-                      <p className="text-xs text-[#9994b8]">{expo.leads.length} leads captured</p>
-                    </div>
-                    <ChevronRight size={16} className="text-[#5a5675]" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="fixed bottom-24 left-0 right-0 flex justify-center pointer-events-none">
-        <Button 
-          onClick={onAddExpo}
-          className="rounded-full h-14 px-8 pointer-events-auto shadow-2xl"
-        >
-          <Plus className="mr-2" size={20} />
-          Create New Expo
-        </Button>
-      </div>
-    </ScreenWrapper>
-  );
-};
 
 // --- Main App ---
 
@@ -231,21 +130,21 @@ const OfflineBanner = () => {
 
 export default function App() {
   const { data, addExpo, addLead, updateLead, updateAgentName, updateSettings } = useAppData();
-  const [currentScreen, setCurrentScreen] = useState('home');
+  const [currentScreen, setCurrentScreen] = useState('expo-dashboard');
   const [selectedExpo, setSelectedExpo] = useState<Expo | null>(null);
   const [showNewExpoModal, setShowNewExpoModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [lastSavedLead, setLastSavedLead] = useState<Lead | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   useEffect(() => {
+    const activeExpo = data.expos.find(e => e.status === 'active') || data.expos[0];
+    if (activeExpo && !selectedExpo) {
+      setSelectedExpo(activeExpo);
+    }
     const params = new URLSearchParams(window.location.search);
-    if (params.get('mode') === 'self') {
-      const activeExpo = data.expos.find(e => e.status === 'active');
-      if (activeExpo) {
-        setSelectedExpo(activeExpo);
-        setCurrentScreen('manual-entry');
-      }
+    if (params.get('mode') === 'self' && activeExpo) {
+      setCurrentScreen('manual-entry');
     }
   }, [data.expos]);
 
@@ -257,10 +156,7 @@ export default function App() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    if (tab === 'home') {
-      setCurrentScreen('home');
-      setSelectedExpo(null);
-    } else if (tab === 'settings') {
+    if (tab === 'settings') {
       setCurrentScreen('settings');
     } else if (tab === 'dashboard' && selectedExpo) {
       setCurrentScreen('expo-dashboard');
@@ -274,23 +170,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-[#f0eff8] selection:bg-[#7c6cf0]/30">
       <AnimatePresence mode="wait">
-        {currentScreen === 'home' && (
-          <ExpoSelection 
-            key="home"
-            data={data}
-            onSelectExpo={handleSelectExpo}
-            onOpenSettings={() => handleTabChange('settings')}
-            onAddExpo={() => setShowNewExpoModal(true)}
-          />
-        )}
-        
-        {/* Placeholder for other screens - will implement in next turns */}
+
         {currentScreen === 'expo-dashboard' && selectedExpo && (
           <ScreenWrapper key="dashboard">
             <OfflineBanner />
             <header className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <button onClick={() => handleTabChange('home')} className="p-2 -ml-2 text-[#9994b8]"><ArrowLeft size={24} /></button>
                 <h1 className="text-xl font-bold truncate max-w-[200px]">{selectedExpo.name}</h1>
               </div>
               <div className="flex items-center gap-2">
@@ -552,7 +437,6 @@ export default function App() {
       <BottomNav 
         activeTab={activeTab} 
         onTabChange={handleTabChange} 
-        expoContext={!!selectedExpo} 
       />
 
       {/* New Expo Modal */}
@@ -744,7 +628,6 @@ const NewLeadSelection = ({ onSelectManual, onSelectHybrid, onCancel }: { onSele
 };
 
 const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialLeadData }: { onCancel: () => void, onSave: (lead: Lead) => void, expo: Expo, agentName: string, allLeads: Lead[], initialLeadData?: Lead }) => {
-  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<Lead>>(initialLeadData || {
     priority: 'Warm',
     interests: [],
@@ -766,8 +649,7 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
     }
   };
 
-  const isStep1Valid = formData.name && formData.mobile?.length === 10 && formData.firmName && formData.priority;
-  const isStep2Valid = !!formData.district;
+  const isValid = !!(formData.name && formData.mobile?.length === 10 && formData.firmName && formData.priority && formData.district);
 
   const [districtSearch, setDistrictSearch] = useState(initialLeadData?.district || '');
   const [showDistrictList, setShowDistrictList] = useState(false);
@@ -778,7 +660,7 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
   }, [districtSearch]);
 
   const handleSave = () => {
-    if (!isStep2Valid || isSaving) return;
+    if (!isValid || isSaving) return;
     setIsSaving(true);
     setTimeout(() => {
       onSave({...formData, id: initialLeadData?.id || `lead_${Date.now()}`} as Lead);
@@ -790,32 +672,19 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
     <ScreenWrapper>
       <header className="flex items-center justify-between mb-8">
         <button onClick={onCancel} className="p-2 -ml-2 text-[#9994b8]"><X size={24} /></button>
-        <div className="flex gap-2">
-          {[1, 2].map(s => (
-            <div key={s} className={cn("w-8 h-1.5 rounded-full transition-colors", step >= s ? "bg-[#7c6cf0]" : "bg-white/10")} />
-          ))}
-        </div>
+        <h2 className="text-xl font-bold">Manual Entry</h2>
         <div className="w-10" />
       </header>
 
-      <AnimatePresence mode="wait">
-        {step === 1 ? (
-          <motion.div 
-            key="step1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="space-y-6"
-          >
-            <h2 className="text-2xl font-bold">Basic Info</h2>
-            <div className="space-y-4">
+      <div className="space-y-6">
+        <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest">Name *</label>
                 <input 
                   autoFocus
                   value={formData.name || ''} 
                   onChange={e => setFormData({...formData, name: e.target.value})}
-                  onKeyDown={e => e.key === 'Enter' && isStep1Valid && setStep(2)}
+                  onKeyDown={e => e.key === 'Enter' && isValid && handleSave()}
                   className="w-full h-12 bg-white/5 border border-white/10 rounded-[12px] px-4 focus:outline-none focus:border-[#7c6cf0]" 
                   placeholder="Full Name" 
                 />
@@ -828,7 +697,7 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
                   value={formData.mobile || ''} 
                   onChange={e => setFormData({...formData, mobile: e.target.value.replace(/\D/g, '')})}
                   onBlur={e => handleMobileBlur(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && isStep1Valid && setStep(2)}
+                  onKeyDown={e => e.key === 'Enter' && isValid && handleSave()}
                   className="w-full h-12 bg-white/5 border border-white/10 rounded-[12px] px-4 font-mono focus:outline-none focus:border-[#7c6cf0]" 
                   placeholder="10-digit mobile" 
                 />
@@ -850,7 +719,7 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
                 <input 
                   value={formData.firmName || ''} 
                   onChange={e => setFormData({...formData, firmName: e.target.value})}
-                  onKeyDown={e => e.key === 'Enter' && isStep1Valid && setStep(2)}
+                  onKeyDown={e => e.key === 'Enter' && isValid && handleSave()}
                   className="w-full h-12 bg-white/5 border border-white/10 rounded-[12px] px-4 focus:outline-none focus:border-[#7c6cf0]" 
                   placeholder="Company Name" 
                 />
@@ -875,18 +744,8 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
                 </div>
               </div>
             </div>
-            <Button disabled={!isStep1Valid} onClick={() => setStep(2)} className="w-full h-14">Next →</Button>
-          </motion.div>
-        ) : (
-          <motion.div 
-            key="step2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
-            <h2 className="text-2xl font-bold">Address & Interest</h2>
-            <div className="space-y-4">
+            
+            <div className="space-y-4 pt-4 border-t border-white/10">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest">Area (Optional)</label>
                 <input 
@@ -924,7 +783,7 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
                           setFormData({...formData, district: d, state: DISTRICT_STATE_MAP[d]});
                           setDistrictSearch(d);
                           setShowDistrictList(false);
-                        } else if (isStep2Valid) {
+                        } else if (isValid) {
                           handleSave();
                         }
                       }
@@ -1017,25 +876,22 @@ const ManualEntryForm = ({ onCancel, onSave, expo, agentName, allLeads, initialL
                 </div>
               </div>
             </div>
-            <div className="flex gap-4">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1 h-14">← Back</Button>
-              <Button 
-                disabled={!isStep2Valid} 
-                onClick={handleSave} 
-                className="flex-1 h-14"
-              >
-                {isSaving ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (initialLeadData ? 'Update Lead' : 'Save Lead')}
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+          <div className="flex gap-4 pt-6 pb-12">
+            <Button variant="outline" onClick={onCancel} className="flex-1 h-14">Cancel</Button>
+            <Button 
+              disabled={!isValid} 
+              onClick={handleSave} 
+              className="flex-1 h-14"
+            >
+              {isSaving ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (initialLeadData ? 'Update Lead' : 'Save Lead')}
+            </Button>
+          </div>
     </ScreenWrapper>
   );
 };
 
 const HybridEntryFlow = ({ onCancel, onSave, expo, agentName, allLeads }: { onCancel: () => void, onSave: (lead: Lead) => void, expo: Expo, agentName: string, allLeads: Lead[] }) => {
-  const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -1081,7 +937,7 @@ const HybridEntryFlow = ({ onCancel, onSave, expo, agentName, allLeads }: { onCa
     }
   };
 
-  const isStep1Valid = formData.name && formData.mobile?.length === 10 && formData.firmName;
+  const isValid = !!(formData.name && formData.mobile?.length === 10 && formData.firmName && formData.priority && formData.district);
 
   if (showCamera) {
     return (
@@ -1104,17 +960,12 @@ const HybridEntryFlow = ({ onCancel, onSave, expo, agentName, allLeads }: { onCa
     <ScreenWrapper>
       <header className="flex items-center justify-between mb-8">
         <button onClick={onCancel} className="p-2 -ml-2 text-[#9994b8]"><X size={24} /></button>
-        <div className="flex gap-2">
-          {[1, 2].map(s => (
-            <div key={s} className={cn("w-8 h-1.5 rounded-full transition-colors", step >= s ? "bg-[#7c6cf0]" : "bg-white/10")} />
-          ))}
-        </div>
+        <h2 className="text-xl font-bold">Hybrid Entry</h2>
         <div className="w-10" />
       </header>
 
-      {step === 1 && (
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold">Scan Visiting Card</h2>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold">Scan Visiting Card</h2>
           <p className="text-sm text-[#9994b8]">Take clear photos of both sides</p>
 
           <div className="grid grid-cols-2 gap-4">
@@ -1222,17 +1073,7 @@ const HybridEntryFlow = ({ onCancel, onSave, expo, agentName, allLeads }: { onCa
                   <input value={formData.area || ''} onChange={e => setFormData({...formData, area: e.target.value})} className="w-full bg-transparent border-b border-white/10 pb-1 focus:outline-none focus:border-[#7c6cf0] text-sm" placeholder="Area" />
                 </div>
               </Card>
-              <p className="text-[10px] text-[#5a5675] text-center italic">Looks correct? Confirm fields above then proceed.</p>
-              <Button disabled={!isStep1Valid} onClick={() => setStep(2)} className="w-full h-14">Next →</Button>
-            </motion.div>
-          )}
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold">Remaining Details</h2>
-          <div className="space-y-4">
+              <div className="space-y-4 pt-4 border-t border-white/10">
             <div className="space-y-2">
               <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest">Priority *</label>
               <div className="flex gap-2">
@@ -1304,24 +1145,26 @@ const HybridEntryFlow = ({ onCancel, onSave, expo, agentName, allLeads }: { onCa
                 <span className="text-sm">{agentName}</span>
               </div>
             </div>
-          </div>
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => setStep(1)} className="flex-1 h-14">← Back</Button>
-            <Button 
-              onClick={() => {
-                setIsSaving(true);
-                setTimeout(() => {
-                  onSave({...formData, id: `lead_${Date.now()}`} as Lead);
-                  setIsSaving(false);
-                }, 1000);
-              }} 
-              className="flex-1 h-14"
-            >
-              {isSaving ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Save Lead'}
-            </Button>
-          </div>
-        </div>
-      )}
+            </div>
+            <div className="flex gap-4 pt-6 pb-12">
+              <Button variant="outline" onClick={onCancel} className="flex-1 h-14">Cancel</Button>
+              <Button 
+                disabled={!isValid}
+                onClick={() => {
+                  setIsSaving(true);
+                  setTimeout(() => {
+                    onSave({...formData, id: `lead_${Date.now()}`} as Lead);
+                    setIsSaving(false);
+                  }, 1000);
+                }} 
+                className="flex-1 h-14"
+              >
+                {isSaving ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Save Lead'}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </div>
     </ScreenWrapper>
   );
 };

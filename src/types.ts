@@ -41,22 +41,8 @@ export const DISTRICTS = Object.keys(DISTRICT_STATE_MAP).sort();
 
 export const INTEREST_CATEGORIES = [
   {
-    label: "NIA Labs",
-    options: ["Biometrics", "Evolis Printer"]
-  },
-  {
-    label: "ExpoVite Products",
-    options: [
-      "ID Cards",
-      "ID Card Holders",
-      "ID Card Accessories",
-      "ID Card Machines",
-      "ID Card Sheets",
-      "Lanyards",
-      "Smart Cards",
-      "Raw Material",
-      "Other"
-    ]
+    label: "Available Products",
+    options: ["ID Cards", "Raw Material", "Bio Matrics", "Evolis Printer"]
   }
 ];
 

@@ -61,7 +61,7 @@ const MOCK_DATA: AppData = {
           city: "Jaipur",
           district: "Jaipur",
           state: "Rajasthan",
-          interests: ["Raw Material", "Lanyards"],
+          interests: ["Raw Material", "Bio Matrics"],
           agentName: "Rahul Sharma",
           timestamp: new Date().toISOString(),
           entryMethod: "hybrid",
