@@ -128,7 +128,123 @@ const OfflineBanner = () => {
   );
 };
 
+const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
+  const [username, setUsername] = useState('Demo');
+  const [password, setPassword] = useState(['', '', '', '']);
+  const [error, setError] = useState('');
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handlePasswordChange = (index: number, value: string) => {
+    if (value.length > 1) value = value[value.length - 1]; // Use last character if multiple pasted
+    
+    const newPass = [...password];
+    newPass[index] = value;
+    setPassword(newPass);
+
+    if (error) setError('');
+
+    // Advance focus
+    if (value !== '' && index < 3) {
+      inputRefs.current[index + 1]?.focus();
+    }
+    
+    // Auto-login when 4th digit is entered
+    if (index === 3 && value !== '' && newPass.every((char) => char !== '')) {
+      submitLogin(newPass);
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && password[index] === '' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'Enter') {
+      submitLogin(password);
+    }
+  };
+
+  const submitLogin = (passArray: string[]) => {
+    if (username === 'Demo' && passArray.join('') === '1234') {
+      onLogin();
+    } else {
+      setError('Invalid username or password');
+    }
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitLogin(password);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] text-[#f0eff8] selection:bg-[#7c6cf0]/30 flex flex-col items-center justify-center p-4">
+      <Card className="w-full max-w-sm bg-[#111118]/80 backdrop-blur-xl border border-white/5 shadow-2xl">
+        <CardContent className="p-8">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-[#7c6cf0]/10 border border-[#7c6cf0]/20 flex items-center justify-center mx-auto mb-4">
+              <Lock className="text-[#7c6cf0]" size={32} />
+            </div>
+            <h1 className="text-2xl font-bold">Agent Login</h1>
+            <p className="text-sm text-[#5a5675] mt-2">Welcome to ExpoVite</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest text-left block w-full">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full h-12 bg-white/5 border border-white/10 rounded-[12px] px-4 focus:outline-none focus:border-[#7c6cf0] transition-colors"
+                placeholder="Enter username"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest text-left block w-full">Password</label>
+              <div className="flex gap-4 justify-between">
+                {[0, 1, 2, 3].map((index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={password[index]}
+                    onChange={(e) => handlePasswordChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onFocus={(e) => e.target.select()}
+                    className="w-14 h-14 bg-white/5 border border-white/10 rounded-[12px] text-center text-xl font-bold focus:outline-none focus:border-[#7c6cf0] focus:bg-[#7c6cf0]/10 transition-colors shadow-inner"
+                    required
+                  />
+                ))}
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-[#f87171]/10 border border-[#f87171]/20 flex items-center gap-2">
+                <AlertCircle size={16} className="text-[#f87171]" />
+                <p className="text-xs text-[#f87171] font-medium">{error}</p>
+              </div>
+            )}
+
+            <Button type="submit" className="w-full h-14 mt-6 text-lg shadow-[0_8px_32px_rgba(124,108,240,0.3)]">
+              Login
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      
+      <div className="mt-8 text-center opacity-50">
+        <p className="text-[10px] font-bold text-[#5a5675] uppercase tracking-widest mb-1">ExpoVite Lead Manager</p>
+        <p className="text-[10px] text-[#5a5675]">Version 2.4.0</p>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { data, addExpo, addLead, updateLead, updateAgentName, updateSettings } = useAppData();
   const [currentScreen, setCurrentScreen] = useState('expo-dashboard');
   const [selectedExpo, setSelectedExpo] = useState<Expo | null>(null);
@@ -168,8 +284,24 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#f0eff8] selection:bg-[#7c6cf0]/30">
-      <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait">
+      {!isAuthenticated ? (
+        <motion.div 
+          key="login"
+          exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        >
+          <LoginScreen onLogin={() => setIsAuthenticated(true)} />
+        </motion.div>
+      ) : (
+        <motion.div 
+          key="app"
+          initial={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          className="min-h-screen bg-[#0a0a0f] text-[#f0eff8] selection:bg-[#7c6cf0]/30"
+        >
+          <AnimatePresence mode="wait">
 
         {currentScreen === 'expo-dashboard' && selectedExpo && (
           <ScreenWrapper key="dashboard">
@@ -500,7 +632,9 @@ export default function App() {
           </>
         )}
       </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
