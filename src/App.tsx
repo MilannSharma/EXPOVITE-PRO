@@ -129,7 +129,8 @@ const OfflineBanner = () => {
 };
 
 const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
-  const [username, setUsername] = useState('Demo');
+  const [step, setStep] = useState(1);
+  const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState(['', '', '', '']);
   const [error, setError] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -163,14 +164,25 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   };
 
   const submitLogin = (passArray: string[]) => {
-    if (username === 'Demo' && passArray.join('') === '1234') {
+    if (passArray.join('') === '1234') {
       onLogin();
     } else {
-      setError('Invalid username or password');
+      setError('Invalid OTP. Use 1234 for testing.');
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSendOTP = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (mobile.length === 10 && /^\d+$/.test(mobile)) {
+      setStep(2);
+      setError('');
+      alert(`OTP sent to ${mobile}!\n\n(Fully Free Staging Environment: Use 1234 to login)`);
+    } else {
+      setError('Please enter a valid 10-digit mobile number');
+    }
+  };
+
+  const handleVerifyOTP = (e: React.FormEvent) => {
     e.preventDefault();
     submitLogin(password);
   };
@@ -187,49 +199,60 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
             <p className="text-sm text-[#5a5675] mt-2">Welcome to ExpoVite</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest text-left block w-full">Username</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full h-12 bg-white/5 border border-white/10 rounded-[12px] px-4 focus:outline-none focus:border-[#7c6cf0] transition-colors"
-                placeholder="Enter username"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest text-left block w-full">Password</label>
-              <div className="flex gap-4 justify-between">
-                {[0, 1, 2, 3].map((index) => (
-                  <input
-                    key={index}
-                    ref={(el) => (inputRefs.current[index] = el)}
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={password[index]}
-                    onChange={(e) => handlePasswordChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    onFocus={(e) => e.target.select()}
-                    className="w-14 h-14 bg-white/5 border border-white/10 rounded-[12px] text-center text-xl font-bold focus:outline-none focus:border-[#7c6cf0] focus:bg-[#7c6cf0]/10 transition-colors shadow-inner"
-                    required
-                  />
-                ))}
+          <form onSubmit={step === 1 ? handleSendOTP : handleVerifyOTP} className="space-y-4">
+            {step === 1 ? (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest text-left block w-full">Mobile Number</label>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                  className="w-full h-12 bg-white/5 border border-white/10 rounded-[12px] px-4 font-mono text-lg focus:outline-none focus:border-[#7c6cf0] transition-colors"
+                  placeholder="10-digit mobile"
+                  required
+                  autoFocus
+                />
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-left mb-2">
+                  <p className="text-xs text-[#9994b8]">+91 {mobile}</p>
+                  <button type="button" onClick={() => { setStep(1); setPassword(['','','','']); }} className="text-[10px] text-[#7c6cf0] font-bold uppercase tracking-widest">Change</button>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#5a5675] uppercase tracking-widest text-left block w-full">Enter OTP</label>
+                  <div className="flex gap-4 justify-between">
+                    {[0, 1, 2, 3].map((index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (inputRefs.current[index] = el)}
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={password[index]}
+                        onChange={(e) => handlePasswordChange(index, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(index, e)}
+                        onFocus={(e) => e.target.select()}
+                        className="w-14 h-14 bg-white/5 border border-white/10 rounded-[12px] text-center text-xl font-bold focus:outline-none focus:border-[#7c6cf0] focus:bg-[#7c6cf0]/10 transition-colors shadow-inner"
+                        required
+                        autoFocus={index === 0}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {error && (
-              <div className="p-3 rounded-xl bg-[#f87171]/10 border border-[#f87171]/20 flex items-center gap-2">
-                <AlertCircle size={16} className="text-[#f87171]" />
-                <p className="text-xs text-[#f87171] font-medium">{error}</p>
+              <div className="p-3 rounded-xl bg-[#f87171]/10 border border-[#f87171]/20 flex items-center gap-2 text-left">
+                <AlertCircle size={16} className="text-[#f87171] shrink-0" />
+                <p className="text-xs text-[#f87171] font-medium leading-tight">{error}</p>
               </div>
             )}
 
             <Button type="submit" className="w-full h-14 mt-6 text-lg shadow-[0_8px_32px_rgba(124,108,240,0.3)]">
-              Login
+              {step === 1 ? 'Send OTP' : 'Verify & Login'}
             </Button>
           </form>
         </CardContent>
